@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>UniTest - Cevap Anahtarı ZIP (Bundle)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 10px;
+    }
+    
+    /* RENKLİ MENÜ TASARIMI */
+    .top-menu {
+      margin-bottom: 25px;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+    .top-menu a {
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: bold;
+      text-decoration: none;
+      color: white;
+      transition: transform 0.2s, opacity 0.2s;
+      display: inline-block;
+    }
+    .top-menu a:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+    
+    /* Menü Renkleri */
+    .btn-new { background-color: #2ecc71; }
+    .btn-bank { background-color: #3498db; }
+    .btn-answers { background-color: #f1c40f; color: #333 !important; }
+    .btn-exams { background-color: #9b59b6; }
+    /* -------------------------- */
+
+    hr { margin: 18px 0; border: 0; border-top: 1px solid #eee; }
+
+    .card {
+      border: 1px solid #ddd;
+      padding: 14px;
+      border-radius: 10px;
+      margin: 14px 0;
+      background: #fafafa;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    input[type="text"], input[type="number"] {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    textarea {
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 10px 20px;
+      margin-top: 15px;
+      cursor: pointer;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      background-color: #fff;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+    button:hover { background-color: #f0f0f0; }
+    
+    .info {
+      font-size: 0.92rem;
+      color: #555;
+      line-height: 1.5;
+      margin: 0 0 10px 0;
+    }
+    code {
+      background: #f3f3f3;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .small-btn {
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      margin-top: 0;
+    }
+    .point-input {
+      width: 80px;
+      font-size: 1rem;
+      border: 2px solid #f1c40f !important;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="top-menu">
+    <a href="http://127.0.0.1:5000/" class="btn-new">✨ Yeni Soru Üret</a>
+    <a href="http://127.0.0.1:5000/bank" class="btn-bank">📚 Soru Bankası</a>
+    <a href="http://127.0.0.1:5000/answers" class="btn-answers">🔑 Cevap Anahtarı</a>
+    <a href="http://127.0.0.1:5000/exams" class="btn-exams">📄 Geçmiş Sınavlar</a>
+  </div>
+  <hr>
+
+  <h1>UniTest - Cevap Anahtarı İndir</h1>
+
+  <div class="card">
+    <h2 style="margin-top:0;">📄 Tek Sınav Kodu ile Cevap Anahtarı (PDF)</h2>
+    <p class="info">Sınav kodunu girerek o sınava özel puanlı cevap anahtarı alabilirsin.</p>
+
+    <form method="POST" action="http://127.0.0.1:5000/download_answer_key" target="_blank" enctype="multipart/form-data">
+      <label>Sınav Kodu:</label>
+      <input type="text" name="exam_code" placeholder="Örn: UNIT-AB3K9Q" required style="width: 320px;" />
+
+      <label>Soru Puanı:</label>
+      <input type="number" name="total_point" value="10" min="1" max="100" class="point-input">
+      <small style="color: #666;"> (Yapay zeka bu puanı adımlara bölecek)</small>
+
+      <label>Öğretmen Çözüm Metni (opsiyonel):</label>
+      <textarea name="solution_text" rows="5" placeholder="Çözüm adımlarını buraya yazabilirsiniz."></textarea>
+
+      <label>Öğretmen Çözüm Görseli (opsiyonel):</label>
+      <input type="file" name="solution_image" accept="image/*" />
+
+      <br>
+      <button type="submit">Cevap Anahtarı PDF'ini indir</button>
+    </form>
+  </div>
+
+
+  <div class="card">
+    <h2 style="margin-top:0;">🗂️ Bundle Kodu ile Cevap Anahtarı (ZIP)</h2>
+    <p class="info">Bundle içindeki tüm sınavlar için toplu cevap anahtarı üretilir.</p>
+
+    <form method="POST" action="http://127.0.0.1:5000/download_answer_keys_bundle" target="_blank" enctype="multipart/form-data">
+      <label>Bundle Kodu:</label>
+      <div class="row">
+        <input id="bundle_code" type="text" name="bundle_code" placeholder="Örn: BND-A1B2C3" required style="width: 320px;" />
+        <button class="small-btn" type="button" onclick="pasteFromClipboard()">Panodan Yapıştır</button>
+      </div>
+
+      <label>Soru Puanı (Her bir soru için):</label>
+      <input type="number" name="total_point" value="10" min="1" max="100" class="point-input">
+      <small style="color: #666;"> (Örn: 20 yazarsanız her soru 20 puan üzerinden adımlandırılır)</small>
+
+      <label>Öğretmen Çözüm Metni (opsiyonel):</label>
+      <textarea name="solution_text" rows="8" placeholder="Çözüm adımlarını buraya yazabilirsiniz."></textarea>
+
+      <label>Öğretmen Çözüm Görseli (opsiyonel):</label>
+      <input type="file" name="solution_image" accept="image/*" />
+
+      <br>
+      <button type="submit">Cevap Anahtarlarını ZIP indir</button>
+    </form>
+  </div>
+
+  <script>
+    async function pasteFromClipboard() {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text) document.getElementById("bundle_code").value = text.trim();
+      } catch (e) {
+        alert("Pano izni verilmedi. Kodu manuel yapıştır.");
+      }
+    }
+  </script>
+</body>
+</html>

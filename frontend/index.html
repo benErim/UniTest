@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <title>UniTest - Soru Varyasyon Üretici</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 10px;
+        }
+
+        /*  RENKLİ MENÜ TASARIMI */
+        .top-menu {
+            margin-bottom: 25px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        .top-menu a {
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: bold;
+            text-decoration: none;
+            color: white;
+            transition: transform 0.2s, opacity 0.2s;
+            display: inline-block;
+        }
+        .top-menu a:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        /* Menü Renkleri */
+        .btn-new { background-color: #2ecc71; }
+        .btn-bank { background-color: #3498db; }
+        .btn-answers { background-color: #f1c40f; color: #333 !important; }
+        .btn-exams { background-color: #9b59b6; }
+        /* -------------------------- */
+
+        hr { margin: 18px 0; border: 0; border-top: 1px solid #eee; }
+
+        h1 { margin-bottom: 10px; }
+
+        .card {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            background: #fafafa;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        input[type="number"] {
+            width: 90px;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        input[type="file"] {
+            padding: 10px 0;
+        }
+
+        button {
+            padding: 12px 24px;
+            margin-top: 15px;
+            cursor: pointer;
+            border-radius: 8px;
+            border: none;
+            background-color: #2ecc71;
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: background 0.3s;
+        }
+        button:hover { background-color: #27ae60; }
+
+        .info {
+            font-size: 0.92rem;
+            color: #555;
+            margin-bottom: 15px;
+            line-height: 1.5;
+            background: #eef9f1;
+            padding: 10px;
+            border-left: 4px solid #2ecc71;
+            border-radius: 4px;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        code {
+            background: #f3f3f3;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-menu">
+        <a href="http://127.0.0.1:5000/" class="btn-new">✨ Yeni Soru Üret</a>
+        <a href="http://127.0.0.1:5000/bank" class="btn-bank">📚 Soru Bankası</a>
+        <a href="http://127.0.0.1:5000/answers" class="btn-answers">🔑 Cevap Anahtarı</a>
+        <a href="http://127.0.0.1:5000/exams" class="btn-exams">📄 Geçmiş Sınavlar</a>
+    </div>
+    <hr>
+
+    <h1>✨ UniTest - Soru Varyasyon Üretici</h1>
+
+    <div class="card">
+        <h2 style="margin-top:0; color: #27ae60;">📝 Tek Soru Analizi → PDF</h2>
+        <p class="info">
+            Bir soru yazın veya görselini yükleyin. Yapay zeka, sorunun <strong>hikayesini ve teknik kurgusunu bozmadan</strong> yeni değerlerle varyasyonlar üretir.
+        </p>
+
+        <form method="POST"
+              action="http://127.0.0.1:5000/download_exam"
+              target="_blank"
+              enctype="multipart/form-data">
+
+            <label>Soru Metni (opsiyonel):</label>
+            <textarea name="question"
+                      placeholder="Örn: Bir araç 80 km/sa hızla 3 saatte ne kadar yol alır?"></textarea>
+
+            <label>Soru Görseli (opsiyonel):</label>
+            <input type="file" name="image" accept="image/*">
+
+            <label>İstenen Varyasyon Sayısı:</label>
+            <input type="number" name="count" value="3" min="1" max="20">
+
+            <br>
+            <button type="submit">Varyasyonları Üret (PDF)</button>
+        </form>
+    </div>
+
+
+    <div class="card">
+        <h2 style="margin-top:0; color: #2980b9;">📄 Sınav Kağıdı (Çoklu Soru) → ZIP</h2>
+
+        <p class="info" style="background: #ebf5fb; border-left-color: #2980b9;">
+            Tüm sınav kağıdını yükleyin. Sistem her öğrenci için soruların sayılarını değiştirerek <strong>farklı sınav kitapçıkları</strong> ve bir <strong>Bundle Kodu</strong> oluşturur.
+        </p>
+
+        <form method="POST"
+              action="http://127.0.0.1:5000/download_exam_bundle"
+              target="_blank"
+              enctype="multipart/form-data">
+
+            <label>Sınav Metni (opsiyonel):</label>
+            <textarea name="exam_text" rows="6"
+                placeholder="Sınavdaki tüm soruları buraya yapıştırabilirsiniz."></textarea>
+
+            <label>Sınav Kağıdı Görseli (PNG/JPG):</label>
+            <input type="file" name="exam_file" accept="image/*">
+
+            <label>Öğrenci Sayısı (Kitapçık Sayısı):</label>
+            <input type="number" name="student_count" value="3" min="1" max="50">
+
+            <br>
+            <button type="submit" style="background-color: #3498db;">Sınavları Paketle (ZIP)</button>
+        </form>
+    </div>
+
+</body>
+</html>c

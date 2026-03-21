@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <title>UniTest - Soru Bankası</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 10px;
+        }
+
+        /*  RENKLİ MENÜ TASARIMI  */
+        .top-menu {
+            margin-bottom: 25px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        .top-menu a {
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: bold;
+            text-decoration: none;
+            color: white;
+            transition: transform 0.2s, opacity 0.2s;
+            display: inline-block;
+        }
+        .top-menu a:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        /* Menü Renkleri */
+        .btn-new { background-color: #2ecc71; }
+        .btn-bank { background-color: #3498db; }
+        .btn-answers { background-color: #f1c40f; color: #333 !important; }
+        .btn-exams { background-color: #9b59b6; }
+        /* -------------------------- */
+
+        hr { margin: 18px 0; border: 0; border-top: 1px solid #eee; }
+
+        h1 { margin-bottom: 10px; }
+
+        .question-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            background-color: #fafafa;
+        }
+        .meta {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        button {
+            padding: 10px 16px;
+            margin-top: 10px;
+            cursor: pointer;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        button:hover { background-color: #f0f0f0; }
+
+        input[type="number"] {
+            width: 60px;
+            padding: 6px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        .filter-bar {
+            margin: 10px 0 25px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+        .filter-bar input[type="text"] {
+            width: 250px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .filter-bar select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-menu">
+        <a href="http://127.0.0.1:5000/" class="btn-new">✨ Yeni Soru Üret</a>
+        <a href="http://127.0.0.1:5000/bank" class="btn-bank">📚 Soru Bankası</a>
+        <a href="http://127.0.0.1:5000/answers" class="btn-answers">🔑 Cevap Anahtarı</a>
+        <a href="http://127.0.0.1:5000/exams" class="btn-exams">📄 Geçmiş Sınavlar</a>
+    </div>
+    <hr>
+
+    <h1>📚 UniTest - Soru Bankası</h1>
+    <p style="color: #555;">
+        Burada daha önce sisteme girilmiş orijinal soruları görebilir ve
+        aynı sorudan yeniden sınav üretebilirsin.
+    </p>
+
+    <div class="filter-bar">
+        <label>
+            <strong>🔍 Soru içinde ara:</strong><br>
+            <input type="text" id="searchText" placeholder="Örn: araba, hız, km..." onkeyup="if(event.keyCode===13) applyFilter()"/>
+        </label>
+
+        <label>
+            <strong>📂 Sırala:</strong><br>
+            <select id="sortOrder">
+                <option value="newest">En yeni önce</option>
+                <option value="oldest">En eski önce</option>
+            </select>
+        </label>
+
+        <div style="margin-top: 15px;">
+            <button type="button" onclick="applyFilter()" style="background-color: #3498db; color: white; border: none;">Filtrele</button>
+            <button type="button" onclick="resetFilter()">Temizle</button>
+        </div>
+    </div>
+
+    <div id="questions"></div>
+
+    <script>
+        let allQuestions = [];
+
+        async function loadQuestions() {
+            try {
+                const res = await fetch("http://127.0.0.1:5000/api/questions");
+                const data = await res.json();
+                allQuestions = data || [];
+                renderQuestions(allQuestions);
+            } catch (err) {
+                console.error("HATA:", err);
+                document.getElementById("questions").innerHTML =
+                    "<p>Soru listesi alınırken hata oluştu.</p>";
+            }
+        }
+
+        function renderQuestions(list) {
+            const container = document.getElementById("questions");
+            container.innerHTML = "";
+
+            if (!Array.isArray(list) || list.length === 0) {
+                container.innerHTML = "<p>Gösterilecek soru bulunamadı.</p>";
+                return;
+            }
+
+            list.forEach(q => {
+                const div = document.createElement("div");
+                div.className = "question-card";
+
+                const preview = q.original_text;
+
+                div.innerHTML = `
+                    <div class="meta">
+                        <strong>🆔 ID:</strong> ${q.id}
+                        &nbsp;|&nbsp;
+                        <strong>📅 Tarih:</strong> ${q.created_at}
+                    </div>
+                    <p style="line-height:1.5;"><strong>Soru:</strong> ${preview}</p>
+
+                    <form method="POST"
+                          action="http://127.0.0.1:5000/download_exam_from_question"
+                          target="_blank">
+                        <input type="hidden" name="question_id" value="${q.id}">
+                        <label><strong>Varyasyon sayısı:</strong></label>
+                        <input type="number" name="count" value="3" min="1" max="30">
+                        <button type="submit" style="border: 2px solid #3498db;">Bu sorudan yeni sınav PDF'i üret</button>
+                    </form>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function applyFilter() {
+            const text = document.getElementById("searchText").value.toLowerCase().trim();
+            const order = document.getElementById("sortOrder").value;
+
+            let filtered = allQuestions;
+
+            if (text !== "") {
+                filtered = filtered.filter(q =>
+                    (q.original_text || "").toLowerCase().includes(text)
+                );
+            }
+
+            filtered = filtered.slice();
+            filtered.sort((a, b) => {
+                if (order === "oldest") {
+                    return (a.created_at || "").localeCompare(b.created_at || "");
+                } else {
+                    return (b.created_at || "").localeCompare(a.created_at || "");
+                }
+            });
+
+            renderQuestions(filtered);
+        }
+
+        function resetFilter() {
+            document.getElementById("searchText").value = "";
+            document.getElementById("sortOrder").value = "newest";
+            renderQuestions(allQuestions);
+        }
+
+        loadQuestions();
+    </script>
+</body>
+</html>

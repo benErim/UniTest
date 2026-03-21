@@ -1,0 +1,8 @@
+flask
+openai
+reportlab
+numpy
+python-dotenv
+pypdf2
+
+

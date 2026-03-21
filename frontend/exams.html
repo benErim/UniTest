@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <title>UniTest - Geçmiş Sınavlar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 10px;
+        }
+
+        /*  RENKLİ MENÜ TASARIMI  */
+        .top-menu {
+            margin-bottom: 25px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        .top-menu a {
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: bold;
+            text-decoration: none;
+            color: white;
+            transition: transform 0.2s, opacity 0.2s;
+            display: inline-block;
+        }
+        .top-menu a:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        /* Menü Renkleri */
+        .btn-new { background-color: #2ecc71; }
+        .btn-bank { background-color: #3498db; }
+        .btn-answers { background-color: #f1c40f; color: #333 !important; }
+        .btn-exams { background-color: #9b59b6; }
+        /* -------------------------- */
+
+        hr { margin: 18px 0; border: 0; border-top: 1px solid #eee; }
+
+        h1 { margin-bottom: 10px; }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 15px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 12px;
+            font-size: 0.95rem;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #9b59b6;
+            color: white;
+            text-align: left;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        tr:hover {
+            background-color: #f9f2fc;
+        }
+
+        .actions form {
+            display: inline-block;
+            margin-right: 5px;
+        }
+        
+        button {
+            padding: 6px 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            border: 1px solid #9b59b6;
+            background-color: #fff;
+            color: #9b59b6;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background-color: #9b59b6;
+            color: #fff;
+        }
+
+        .empty {
+            margin-top: 20px;
+            color: #666;
+            text-align: center;
+            padding: 40px;
+            background: #fdfdfd;
+            border-radius: 10px;
+            border: 1px dashed #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-menu">
+        <a href="http://127.0.0.1:5000/" class="btn-new">✨ Yeni Soru Üret</a>
+        <a href="http://127.0.0.1:5000/bank" class="btn-bank">📚 Soru Bankası</a>
+        <a href="http://127.0.0.1:5000/answers" class="btn-answers">🔑 Cevap Anahtarı</a>
+        <a href="http://127.0.0.1:5000/exams" class="btn-exams">📄 Geçmiş Sınavlar</a>
+    </div>
+    <hr>
+
+    <h1>📄 Geçmiş Sınavlar</h1>
+    <p style="color: #555;">Daha önce oluşturulmuş sınavların detaylı listesi ve yönetim paneli.</p>
+
+    <div id="content"></div>
+
+    <script>
+        async function loadExams() {
+            const container = document.getElementById("content");
+            container.innerHTML = "<p style='text-align:center;'>Yükleniyor...</p>";
+
+            try {
+                const res = await fetch("http://127.0.0.1:5000/api/exams");
+                const data = await res.json();
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    container.innerHTML = "<div class='empty'>Henüz oluşturulmuş sınav bulunmuyor.</div>";
+                    return;
+                }
+
+                let html = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>🆔 ID</th>
+                                <th>🎫 Sınav Kodu</th>
+                                <th>📅 Tarih</th>
+                                <th>📝 Soru Sayısı</th>
+                                <th>🛠️ İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                data.forEach(exam => {
+                    html += `
+                        <tr>
+                            <td><strong>${exam.id}</strong></td>
+                            <td><code>${exam.exam_code}</code></td>
+                            <td>${exam.created_at}</td>
+                            <td>${exam.question_count} varyasyon</td>
+                            <td class="actions">
+                                <form method="POST"
+                                      action="http://127.0.0.1:5000/download_existing_exam"
+                                      target="_blank">
+                                    <input type="hidden" name="exam_id" value="${exam.id}">
+                                    <button type="submit">📄 PDF İndir</button>
+                                </form>
+
+                                <form method="POST"
+                                      action="http://127.0.0.1:5000/regenerate_exam"
+                                      target="_blank">
+                                    <input type="hidden" name="exam_id" value="${exam.id}">
+                                    <button type="submit" style="border-color: #2ecc71; color: #2ecc71;">🔄 Tekrar Üret</button>
+                                </form>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                html += "</tbody></table>";
+                container.innerHTML = html;
+
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = "<div class='empty'>Sınav listesi alınırken hata oluştu.</div>";
+            }
+        }
+
+        loadExams();
+    </script>
+</body>
+</html>
